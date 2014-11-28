@@ -49,12 +49,12 @@ func downloadPackage(homeDir string, url string, version string) error {
 	return unzip(zipPath, path)
 }
 
-func getPackageURL(url string, version string, ext string) string {
-	return fmt.Sprint(url, packagePrefix, version, "-", runtime.GOOS, ext)
-}
-
 func getPackagePath(homeDir string, version string, ext string) string {
 	return filepath.Join(homeDir, (packagePrefix + version + ext))
+}
+
+func getPackageURL(url string, version string, ext string) string {
+	return fmt.Sprint(url, packagePrefix, version, "-", runtime.GOOS, ext)
 }
 
 func packageExist(homeDir string, version string) bool {
