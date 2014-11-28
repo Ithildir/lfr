@@ -22,23 +22,37 @@ func main() {
 
 	err := checkJava()
 
-	fatalIfError(err)
+	fatalIfError(err, "")
 
 	homeDir, err := getHomeDir()
 
-	fatalIfError(err)
+	fatalIfError(err, "Unable to get home directory")
 
 	cfg, err := readConfig(homeDir)
 
-	fatalIfError(err)
+	fatalIfError(err, "Unable to read configuration")
 
 	if len(version) > 0 {
 		err = downloadPackage(homeDir, url, version)
-	} else {
 
+		fatalIfError(err, ("Unable to download package version " + version))
+	} else {
+		err = update(&cfg, homeDir, url)
+
+		if err != nil {
+			if packageExist(homeDir, cfg.Version) {
+				msg := fmt.Sprint("Unable to update to current version (", err.Error(), "), using ", cfg.Version, " instead")
+
+				fmt.Println(msg)
+			} else {
+				fatalIfError(err, "Unable to update to current version")
+			}
+		}
+
+		version = cfg.Version
 	}
 
-	fatalIfError(err)
+	fmt.Println("Using package version " + version)
 
 	cfg.save(homeDir)
 }
@@ -67,9 +81,13 @@ func checkJava() error {
 	return nil
 }
 
-func fatalIfError(err error) {
+func fatalIfError(err error, msg string) {
 	if err != nil {
-		fmt.Println(err)
+		if len(msg) > 0 {
+			fmt.Println(msg + ": " + err.Error())
+		} else {
+			fmt.Println(err)
+		}
 
 		os.Exit(1)
 	}

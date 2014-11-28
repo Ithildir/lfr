@@ -22,7 +22,7 @@ func checkMD5(path string, md5Path string) error {
 
 	defer f.Close()
 
-	checkMD5, err := readFile(md5Path)
+	checkMD5, err := pathToString(md5Path)
 
 	if err != nil {
 		return err
@@ -41,32 +41,6 @@ func checkMD5(path string, md5Path string) error {
 	return nil
 }
 
-func downloadFile(url string, dest string) error {
-	f, err := os.Create(dest)
-
-	if err != nil {
-		return err
-	}
-
-	defer f.Close()
-
-	resp, err := http.Get(url)
-
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
-	}
-
-	_, err = io.Copy(f, resp.Body)
-
-	return err
-}
-
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
 
@@ -77,7 +51,7 @@ func pathExists(path string) bool {
 	return true
 }
 
-func readFile(path string) (string, error) {
+func pathToString(path string) (string, error) {
 	b, err := ioutil.ReadFile(path)
 
 	if err != nil {
@@ -153,4 +127,52 @@ func unzip(zipPath string, dest string) error {
 	}
 
 	return nil
+}
+
+func urlToFile(url string, dest string) error {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(resp.Status)
+	}
+
+	f, err := os.Create(dest)
+
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	_, err = io.Copy(f, resp.Body)
+
+	return err
+}
+
+func urlToString(url string) (string, error) {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(resp.Status)
+	}
+
+	b, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 const (
-	defaultURL    string = "http://localhost:8080/lfr/"
-	packagePrefix string = "v"
+	defaultURL     string = "http://localhost:8080/lfr/"
+	updateInterval int64  = 60 * 60 * 24
 )
 
 func downloadPackage(homeDir string, url string, version string) error {
@@ -18,12 +19,12 @@ func downloadPackage(homeDir string, url string, version string) error {
 		return nil
 	}
 
-	fmt.Println("Downloading package version " + version)
+	fmt.Println("Downloading package version " + version + "...")
 
 	zipPath := getPackagePath(homeDir, version, ".zip")
 	zipURL := getPackageURL(url, version, ".zip")
 
-	err := downloadFile(zipURL, zipPath)
+	err := urlToFile(zipURL, zipPath)
 
 	if err != nil {
 		return err
@@ -32,7 +33,7 @@ func downloadPackage(homeDir string, url string, version string) error {
 	md5Path := getPackagePath(homeDir, version, ".md5")
 	md5URL := getPackageURL(url, version, ".md5")
 
-	err = downloadFile(md5URL, md5Path)
+	err = urlToFile(md5URL, md5Path)
 
 	if err != nil {
 		return err
@@ -50,15 +51,40 @@ func downloadPackage(homeDir string, url string, version string) error {
 }
 
 func getPackagePath(homeDir string, version string, ext string) string {
-	return filepath.Join(homeDir, (packagePrefix + version + ext))
+	return filepath.Join(homeDir, version+ext)
 }
 
 func getPackageURL(url string, version string, ext string) string {
-	return fmt.Sprint(url, packagePrefix, version, "-", runtime.GOOS, ext)
+	return fmt.Sprint(url, version, "-", runtime.GOOS, ext)
 }
 
 func packageExist(homeDir string, version string) bool {
 	path := getPackagePath(homeDir, version, "")
 
 	return pathExists(path)
+}
+
+func update(cfg *config, homeDir string, url string) error {
+	now := time.Now().Unix()
+
+	if packageExist(homeDir, cfg.Version) && (cfg.LastUpdate >= (now - updateInterval)) {
+		return nil
+	}
+
+	currentVersion, err := urlToString(url + "CURRENT")
+
+	if err != nil {
+		return err
+	}
+
+	err = downloadPackage(homeDir, url, currentVersion)
+
+	if err != nil {
+		return err
+	}
+
+	cfg.LastUpdate = now
+	cfg.Version = currentVersion
+
+	return nil
 }
