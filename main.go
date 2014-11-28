@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/user"
@@ -14,6 +15,11 @@ const (
 )
 
 func main() {
+	url := *flag.String("url", defaultURL, "URL for downloading packages")
+	version := *flag.String("version", "", "version of the package to use (empty for current)")
+
+	flag.Parse()
+
 	err := checkJava()
 
 	fatalIfError(err)
@@ -23,6 +29,14 @@ func main() {
 	fatalIfError(err)
 
 	cfg, err := readConfig(homeDir)
+
+	fatalIfError(err)
+
+	if len(version) > 0 {
+		err = downloadPackage(homeDir, url, version)
+	} else {
+
+	}
 
 	fatalIfError(err)
 
@@ -38,14 +52,14 @@ func checkJava() error {
 
 	names := []string{"java", "javac"}
 
-	for _, n := range names {
+	for _, name := range names {
 		if runtime.GOOS == "windows" {
-			n += ".exe"
+			name += ".exe"
 		}
 
-		n = filepath.Join(javaHome, "bin", n)
+		path := filepath.Join(javaHome, "bin", name)
 
-		if !fileExists(n) {
+		if !pathExists(path) {
 			return errors.New("The JAVA_HOME environment variable is not defined correctly.")
 		}
 	}
@@ -62,13 +76,13 @@ func fatalIfError(err error) {
 }
 
 func getHomeDir() (string, error) {
-	u, err := user.Current()
+	user, err := user.Current()
 
 	if err != nil {
 		return "", err
 	}
 
-	homeDir := filepath.Join(u.HomeDir, homeName)
+	homeDir := filepath.Join(user.HomeDir, homeName)
 
 	err = os.MkdirAll(homeDir, 0777)
 

@@ -7,20 +7,20 @@ import (
 )
 
 type config struct {
-	Check int64
-	Ver   int
+	LastUpdate int64
+	Version    string
 }
 
 const configFileName string = "config.json"
 
 func readConfig(homeDir string) (config, error) {
-	p := filepath.Join(homeDir, configFileName)
+	path := filepath.Join(homeDir, configFileName)
 
-	if !fileExists(p) {
+	if !pathExists(path) {
 		return config{}, nil
 	}
 
-	b, err := ioutil.ReadFile(p)
+	bytes, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		return config{}, err
@@ -28,19 +28,19 @@ func readConfig(homeDir string) (config, error) {
 
 	var cfg config
 
-	err = json.Unmarshal(b, &cfg)
+	err = json.Unmarshal(bytes, &cfg)
 
 	return cfg, err
 }
 
 func (cfg config) save(homeDir string) error {
-	p := filepath.Join(homeDir, configFileName)
+	path := filepath.Join(homeDir, configFileName)
 
-	b, err := json.Marshal(cfg)
+	bytes, err := json.Marshal(cfg)
 
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(p, b, 0777)
+	return ioutil.WriteFile(path, bytes, 0777)
 }
