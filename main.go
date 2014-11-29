@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	blank string = ""
-	dash string = "-"
+	blank    string = ""
+	dash     string = "-"
 	homeName string = ".lfr"
-	space string = " "
+	space    string = " "
 )
 
 var (
