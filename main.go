@@ -9,11 +9,10 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
-const (
-	homeName string = ".lfr"
-)
+const homeName string = ".lfr"
 
 var (
 	argVersion string
@@ -105,7 +104,11 @@ func execute(homeDir, version string, args []string) error {
 		return err
 	}
 
-	path := filepath.Join(packagePath, prefix)
+	tokens := strings.Split(prefix, " ")
+
+	path := filepath.Join(packagePath, tokens[0])
+
+	args = append(tokens[1:], args...)
 
 	cmd := exec.Command(path, args...)
 
