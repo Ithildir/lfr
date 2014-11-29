@@ -12,7 +12,12 @@ import (
 	"strings"
 )
 
-const homeName string = ".lfr"
+const (
+	blank string = ""
+	dash string = "-"
+	homeName string = ".lfr"
+	space string = " "
+)
 
 var (
 	argVersion string
@@ -21,7 +26,7 @@ var (
 
 func init() {
 	flag.StringVar(&argURL, "url", defaultURL, "URL for downloading packages")
-	flag.StringVar(&argVersion, "version", "", "version of the package to use (empty for current)")
+	flag.StringVar(&argVersion, "version", blank, "version of the package to use (empty for current)")
 }
 
 func main() {
@@ -29,7 +34,7 @@ func main() {
 
 	err := checkJava()
 
-	fatalIfError(err, "")
+	fatalIfError(err, blank)
 
 	homeDir, err := getHomeDir()
 
@@ -95,7 +100,7 @@ func checkJava() error {
 }
 
 func execute(homeDir, version string, args []string) error {
-	packagePath := getPackagePath(homeDir, version, "")
+	packagePath := getPackagePath(homeDir, version, blank)
 	prefixPath := filepath.Join(packagePath, "PREFIX")
 
 	prefix, err := pathToString(prefixPath)
@@ -104,7 +109,7 @@ func execute(homeDir, version string, args []string) error {
 		return err
 	}
 
-	tokens := strings.Split(prefix, " ")
+	tokens := strings.Split(prefix, space)
 
 	path := filepath.Join(packagePath, tokens[0])
 
@@ -134,7 +139,7 @@ func getHomeDir() (string, error) {
 	user, err := user.Current()
 
 	if err != nil {
-		return "", err
+		return blank, err
 	}
 
 	homeDir := filepath.Join(user.HomeDir, homeName)

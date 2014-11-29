@@ -45,7 +45,7 @@ func downloadPackage(homeDir string, url string, version string) error {
 		return err
 	}
 
-	path := getPackagePath(homeDir, version, "")
+	path := getPackagePath(homeDir, version, blank)
 
 	return unzip(zipPath, path)
 }
@@ -55,11 +55,11 @@ func getPackagePath(homeDir string, version string, ext string) string {
 }
 
 func getPackageURL(url string, version string, ext string) string {
-	return fmt.Sprint(url, version, "-", runtime.GOOS, ext)
+	return fmt.Sprint(url, version, dash, runtime.GOOS, ext)
 }
 
 func packageExist(homeDir string, version string) bool {
-	path := getPackagePath(homeDir, version, "")
+	path := getPackagePath(homeDir, version, blank)
 
 	return pathExists(path)
 }

@@ -55,7 +55,7 @@ func pathToString(path string) (string, error) {
 	b, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		return "", err
+		return blank, err
 	}
 
 	return string(b), nil
@@ -159,19 +159,19 @@ func urlToString(url string) (string, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		return "", err
+		return blank, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New(resp.Status)
+		return blank, errors.New(resp.Status)
 	}
 
 	b, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		return "", err
+		return blank, err
 	}
 
 	return string(b), nil
