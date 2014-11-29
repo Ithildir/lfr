@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -14,10 +15,17 @@ const (
 	homeName string = ".lfr"
 )
 
-func main() {
-	url := *flag.String("url", defaultURL, "URL for downloading packages")
-	version := *flag.String("version", "", "version of the package to use (empty for current)")
+var (
+	argVersion string
+	argURL     string
+)
 
+func init() {
+	flag.StringVar(&argURL, "url", defaultURL, "URL for downloading packages")
+	flag.StringVar(&argVersion, "version", "", "version of the package to use (empty for current)")
+}
+
+func main() {
 	flag.Parse()
 
 	err := checkJava()
@@ -32,12 +40,12 @@ func main() {
 
 	fatalIfError(err, "Unable to read configuration")
 
-	if len(version) > 0 {
-		err = downloadPackage(homeDir, url, version)
+	if len(argVersion) > 0 {
+		err = downloadPackage(homeDir, argURL, argVersion)
 
-		fatalIfError(err, ("Unable to download package version " + version))
+		fatalIfError(err, ("Unable to download package version " + argVersion))
 	} else {
-		err = update(&cfg, homeDir, url)
+		err = update(&cfg, homeDir, argURL)
 
 		if err != nil {
 			if packageExist(homeDir, cfg.Version) {
@@ -49,12 +57,18 @@ func main() {
 			}
 		}
 
-		version = cfg.Version
+		argVersion = cfg.Version
 	}
 
-	fmt.Println("Using package version " + version)
+	err = cfg.save(homeDir)
 
-	cfg.save(homeDir)
+	fatalIfError(err, "Unable to save configuration")
+
+	fmt.Println("Using package version " + argVersion)
+
+	err = execute(homeDir, argVersion, flag.Args())
+
+	fatalIfError(err, "Unable to execute command")
 }
 
 func checkJava() error {
@@ -79,6 +93,26 @@ func checkJava() error {
 	}
 
 	return nil
+}
+
+func execute(homeDir, version string, args []string) error {
+	packagePath := getPackagePath(homeDir, version, "")
+	prefixPath := filepath.Join(packagePath, "PREFIX")
+
+	prefix, err := pathToString(prefixPath)
+
+	if err != nil {
+		return err
+	}
+
+	path := filepath.Join(packagePath, prefix)
+
+	cmd := exec.Command(path, args...)
+
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	return cmd.Run()
 }
 
 func fatalIfError(err error, msg string) {

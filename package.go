@@ -39,11 +39,11 @@ func downloadPackage(homeDir string, url string, version string) error {
 		return err
 	}
 
-	err = checkMD5(zipPath, md5Path)
-
-	if err != nil {
-		return err
-	}
+	//	err = checkMD5(zipPath, md5Path)
+	//
+	//	if err != nil {
+	//		return err
+	//	}
 
 	path := getPackagePath(homeDir, version, "")
 
