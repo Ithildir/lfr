@@ -13,7 +13,7 @@ const (
 )
 
 func downloadPackage(homeDir string, url string, version string) error {
-	if packageExist(homeDir, version) {
+	if packageExists(homeDir, version) {
 		fmt.Println("Package version " + version + " is already installed")
 
 		return nil
@@ -51,14 +51,14 @@ func downloadPackage(homeDir string, url string, version string) error {
 }
 
 func getPackagePath(homeDir string, version string, ext string) string {
-	return filepath.Join(homeDir, version+ext)
+	return filepath.Join(homeDir, (version + ext))
 }
 
 func getPackageURL(url string, version string, ext string) string {
 	return fmt.Sprint(url, version, dash, runtime.GOOS, ext)
 }
 
-func packageExist(homeDir string, version string) bool {
+func packageExists(homeDir string, version string) bool {
 	if isNull(version) {
 		return false
 	}
@@ -71,7 +71,7 @@ func packageExist(homeDir string, version string) bool {
 func update(cfg *config, homeDir string, url string) error {
 	now := time.Now().Unix()
 
-	if packageExist(homeDir, cfg.Version) && (cfg.LastUpdate >= (now - updateInterval)) {
+	if packageExists(homeDir, cfg.Version) && (cfg.LastUpdate >= (now - updateInterval)) {
 		return nil
 	}
 

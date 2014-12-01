@@ -52,7 +52,7 @@ func main() {
 		err = update(&cfg, homeDir, argURL)
 
 		if err != nil {
-			if packageExist(homeDir, cfg.Version) {
+			if packageExists(homeDir, cfg.Version) {
 				msg := fmt.Sprint("Unable to update to current version (", err.Error(), "), using ", cfg.Version, " instead")
 
 				fmt.Println(msg)
