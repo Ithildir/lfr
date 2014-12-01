@@ -44,7 +44,7 @@ func main() {
 
 	fatalIfError(err, "Unable to read configuration")
 
-	if len(argVersion) > 0 {
+	if isNotNull(argVersion) {
 		err = downloadPackage(homeDir, argURL, argVersion)
 
 		fatalIfError(err, ("Unable to download package version " + argVersion))
@@ -78,7 +78,7 @@ func main() {
 func checkJava() error {
 	javaHome := os.Getenv("JAVA_HOME")
 
-	if len(javaHome) == 0 {
+	if isNull(javaHome) {
 		return errors.New("The JAVA_HOME environment variable is not defined.")
 	}
 
@@ -125,7 +125,7 @@ func execute(homeDir, version string, args []string) error {
 
 func fatalIfError(err error, msg string) {
 	if err != nil {
-		if len(msg) > 0 {
+		if isNotNull(msg) {
 			fmt.Println(msg + ": " + err.Error())
 		} else {
 			fmt.Println(err)

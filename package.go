@@ -59,6 +59,10 @@ func getPackageURL(url string, version string, ext string) string {
 }
 
 func packageExist(homeDir string, version string) bool {
+	if isNull(version) {
+		return false
+	}
+
 	path := getPackagePath(homeDir, version, blank)
 
 	return pathExists(path)

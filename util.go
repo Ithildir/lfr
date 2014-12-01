@@ -41,6 +41,18 @@ func checkMD5(path string, md5Path string) error {
 	return nil
 }
 
+func isNotNull(s string) bool {
+	return !isNull(s)
+}
+
+func isNull(s string) bool {
+	if len(s) == 0 {
+		return true
+	}
+
+	return false
+}
+
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
 
@@ -93,7 +105,7 @@ func unzip(zipPath string, dest string) error {
 			}
 		}
 
-		if len(destEntryDir) > 0 {
+		if isNotNull(destEntryDir) {
 			err := os.MkdirAll(destEntryDir, 0777)
 
 			if err != nil {
